@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Clinical Assessment | Rehab AI</title>
+
+<style>
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f2f7f7;
+  color: #203b40;
+}
+
+header {
+  background: #126b70;
+  color: white;
+  text-align: center;
+  padding: 22px;
+}
+
+header h1 { margin: 0; }
+
+main {
+  max-width: 750px;
+  margin: 25px auto;
+  padding: 15px;
+}
+
+.card {
+  background: white;
+  padding: 22px;
+  margin-bottom: 18px;
+  border-radius: 13px;
+  box-shadow: 0 2px 8px #00000010;
+}
+
+h2, h3 { color: #126b70; }
+
+label {
+  display: block;
+  font-weight: bold;
+  margin: 14px 0 6px;
+}
+
+input, select, textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ccdada;
+  border-radius: 7px;
+  font-size: 15px;
+}
+
+textarea { min-height: 75px; }
+
+button {
+  background: #126b70;
+  color: white;
+  border: none;
+  padding: 13px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  margin-top: 15px;
+  width: 100%;
+  font-size: 15px;
+}
+
+.back {
+  display: inline-block;
+  margin-bottom: 15px;
+  color: #126b70;
+}
+
+#patientDetails {
+  background: #eaf5f4;
+  padding: 15px;
+  border-radius: 8px;
+  margin-top: 15px;
+  display: none;
+  line-height: 1.7;
+}
+
+#message {
+  font-weight: bold;
+  margin-top: 15px;
+  color: #126b70;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+<h1>Rehab AI</h1>
+<p>Clinical Assessment Module</p>
+</header>
+
+<main>
+
+<a class="back" href="index.html">← Back to Home</a>
+
+<div class="card">
+<h2>Patient Selection</h2>
+
+<label>Select Registered Patient</label>
+<select id="patientSelect" required>
+<option value="">Select Patient ID</option>
+</select>
+
+<div id="patientDetails"></div>
+</div>
+
+<form id="assessmentForm">
+
+<div class="card">
+<h2>1. Pain Assessment</h2>
+
+<label>Pain Intensity (NPRS: 0–10)</label>
+<input type="number" id="pain" min="0" max="10" required>
+
+<label>Pain Location</label>
+<input type="text" id="painLocation">
+
+<label>Nature of Pain</label>
+<select id="painNature">
+<option value="">Select</option>
+<option>Sharp</option>
+<option>Dull aching</option>
+<option>Burning</option>
+<option>Radiating</option>
+<option>Throbbing</option>
+<option>Other</option>
+</select>
+</div>
+
+<div class="card">
+<h2>2. Range of Motion (ROM)</h2>
+
+<label>Joint Assessed</label>
+<input type="text" id="joint" placeholder="e.g. Shoulder">
+
+<label>Movement</label>
+<input type="text" id="movement" placeholder="e.g. Flexion">
+
+<label>Active ROM (degrees)</label>
+<input type="number" id="arom" min="0" max="360">
+
+<label>Passive ROM (degrees)</label>
+<input type="number" id="prom" min="0" max="360">
+
+<label>ROM Remarks</label>
+<textarea id="romRemarks"></textarea>
+</div>
+
+<div class="card">
+<h2>3. Muscle Strength Assessment</h2>
+
+<label>Muscle Group</label>
+<input type="text" id="muscle" placeholder="e.g. Shoulder flexors">
+
+<label>MMT Grade (0–5)</label>
+<select id="mmt">
+<option value="">Select Grade</option>
+<option value="0">0 - No contraction</option>
+<option value="1">1 - Trace contraction</option>
+<option value="2">2 - Full ROM, gravity eliminated</option>
+<option value="3">3 - Full ROM against gravity</option>
+<option value="4">4 - Against moderate resistance</option>
+<option value="5">5 - Normal strength</option>
+</select>
+</div>
+
+<div class="card">
+<h2>4. Functional Assessment</h2>
+
+<label>Functional Limitations</label>
+<textarea id="limitations" placeholder="Walking, transfers, stairs, dressing etc."></textarea>
+
+<label>Balance Status</label>
+<select id="balance">
+<option value="">Select</option>
+<option>Normal</option>
+<option>Mildly impaired</option>
+<option>Moderately impaired</option>
+<option>Severely impaired</option>
+</select>
+
+<label>Gait Assessment</label>
+<textarea id="gait" placeholder="Describe gait pattern and deviations"></textarea>
+</div>
+
+<div class="card">
+<h2>5. Clinical Findings</h2>
+
+<label>Physiotherapist's Clinical Findings</label>
+<textarea id="findings" required placeholder="Enter important clinical observations"></textarea>
+
+<label>Assessment Date</label>
+<input type="date" id="assessmentDate" required>
+
+<button type="submit">Save Clinical Assessment</button>
+
+<div id="message"></div>
+</div>
+
+</form>
+</main>
+
+<script>
+const patients = JSON.parse(
+  localStorage.getItem("rehabPatients") || "[]"
+);
+
+const select = document.getElementById("patientSelect");
+const details = document.getElementById("patientDetails");
+
+patients.forEach(patient => {
+  const option = document.createElement("option");
+  option.value = patient.id;
+  option.textContent = patient.id + " - " + patient.name;
+  select.appendChild(option);
+});
+
+select.addEventListener("change", function() {
+  const patient = patients.find(p => p.id === this.value);
+
+  if (!patient) {
+    details.style.display = "none";
+    return;
+  }
+
+  details.style.display = "block";
+  details.textContent =
+    "Patient: " + patient.name +
+    " | Age: " + patient.age +
+    " | Diagnosis: " + patient.diagnosis;
+});
+
+document.getElementById("assessmentDate").value =
+  new Date().toISOString().split("T")[0];
+
+document.getElementById("assessmentForm")
+.addEventListener("submit", function(event) {
+
+  event.preventDefault();
+
+  const patientId = select.value;
+
+  if (!patientId) {
+    document.getElementById("message").textContent =
+      "Please select a registered patient first.";
+    return;
+  }
+
+  const assessment = {
+    patientId: patientId,
+    pain: document.getElementById("pain").value,
+    painLocation: document.getElementById("painLocation").value,
+    painNature: document.getElementById("painNature").value,
+    joint: document.getElementById("joint").value,
+    movement: document.getElementById("movement").value,
+    arom: document.getElementById("arom").value,
+    prom: document.getElementById("prom").value,
+    romRemarks: document.getElementById("romRemarks").value,
+    muscle: document.getElementById("muscle").value,
+    mmt: document.getElementById("mmt").value,
+    limitations: document.getElementById("limitations").value,
+    balance: document.getElementById("balance").value,
+    gait: document.getElementById("gait").value,
+    findings: document.getElementById("findings").value,
+    date: document.getElementById("assessmentDate").value
+  };
+
+  const assessments = JSON.parse(
+    localStorage.getItem("rehabAssessments") || "[]"
+  );
+
+  assessments.push(assessment);
+
+  localStorage.setItem(
+    "rehabAssessments",
+    JSON.stringify(assessments)
+  );
+
+  document.getElementById("message").textContent =
+    "Clinical assessment saved successfully!";
+
+  this.reset();
+
+  document.getElementById("assessmentDate").value =
+    new Date().toISOString().split("T")[0];
+
+});
+</script>
+
+</body>
+</html>
