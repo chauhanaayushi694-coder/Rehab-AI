@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Patient Registration | Rehab AI</title>
+
+<style>
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f2f7f7;
+  color: #203b40;
+}
+
+header {
+  background: #126b70;
+  color: white;
+  padding: 22px;
+  text-align: center;
+}
+
+header h1 { margin: 0; }
+
+main {
+  max-width: 700px;
+  margin: 25px auto;
+  padding: 15px;
+}
+
+.card {
+  background: white;
+  padding: 25px;
+  border-radius: 14px;
+  box-shadow: 0 2px 10px #00000010;
+}
+
+h2 { color: #126b70; }
+
+label {
+  display: block;
+  margin: 15px 0 6px;
+  font-weight: bold;
+}
+
+input, select, textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ccdada;
+  border-radius: 7px;
+  font-size: 15px;
+}
+
+textarea { min-height: 85px; }
+
+button {
+  margin-top: 20px;
+  padding: 13px 20px;
+  background: #126b70;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  width: 100%;
+}
+
+.back {
+  display: inline-block;
+  margin-bottom: 15px;
+  color: #126b70;
+}
+
+#message {
+  margin-top: 15px;
+  font-weight: bold;
+  color: #126b70;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+<h1>Rehab AI</h1>
+<p>Patient Registration Module</p>
+</header>
+
+<main>
+
+<a class="back" href="index.html">← Back to Home</a>
+
+<div class="card">
+<h2>Register New Patient</h2>
+<p>Enter the patient's basic clinical information.</p>
+
+<form id="patientForm">
+
+<label>Patient ID</label>
+<input type="text" id="patientId" required placeholder="Enter patient ID">
+
+<label>Full Name</label>
+<input type="text" id="name" required placeholder="Patient name">
+
+<label>Age</label>
+<input type="number" id="age" required min="1" max="120" placeholder="Age">
+
+<label>Gender</label>
+<select id="gender" required>
+<option value="">Select gender</option>
+<option>Male</option>
+<option>Female</option>
+<option>Other</option>
+<option>Prefer not to say</option>
+</select>
+
+<label>Contact Number</label>
+<input type="tel" id="contact" placeholder="Contact number">
+
+<label>Primary Diagnosis</label>
+<input type="text" id="diagnosis" required placeholder="Enter diagnosis">
+
+<label>Chief Complaint</label>
+<textarea id="complaint" required placeholder="Describe the main problem"></textarea>
+
+<label>Medical History</label>
+<textarea id="history" placeholder="Relevant medical and surgical history"></textarea>
+
+<label>Duration of Symptoms</label>
+<input type="text" id="duration" placeholder="e.g. 3 weeks">
+
+<label>
+<input type="checkbox" id="consent" required style="width:auto">
+I confirm that consent has been obtained for this demonstration record.
+</label>
+
+<button type="submit">Register Patient</button>
+
+</form>
+
+<div id="message"></div>
+
+</div>
+</main>
+
+<script>
+document.getElementById("patientForm")
+.addEventListener("submit", function(event) {
+
+event.preventDefault();
+
+const patient = {
+  id: document.getElementById("patientId").value.trim(),
+  name: document.getElementById("name").value.trim(),
+  age: document.getElementById("age").value,
+  gender: document.getElementById("gender").value,
+  contact: document.getElementById("contact").value,
+  diagnosis: document.getElementById("diagnosis").value.trim(),
+  complaint: document.getElementById("complaint").value.trim(),
+  history: document.getElementById("history").value,
+  duration: document.getElementById("duration").value
+};
+
+let patients = JSON.parse(
+  localStorage.getItem("rehabPatients") || "[]"
+);
+
+if (patients.some(p => p.id === patient.id)) {
+  document.getElementById("message").textContent =
+    "This Patient ID already exists. Please use another ID.";
+  return;
+}
+
+patients.push(patient);
+
+localStorage.setItem(
+  "rehabPatients",
+  JSON.stringify(patients)
+);
+
+document.getElementById("message").textContent =
+  "Patient registered successfully!";
+
+this.reset();
+
+});
+</script>
+
+</body>
+</html>
